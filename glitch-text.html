@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glitch Effect with Konva.js</title>
+  <script src="https://unpkg.com/konva@8.3.0/konva.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: black;
+    }
+  </style>
+</head>
+<body>
+  <div id="container"></div>
+  <script>
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    const stage = new Konva.Stage({
+      container: 'container',
+      width: width,
+      height: height
+    });
+
+    const layer1 = new Konva.Layer();
+    const layer2 = new Konva.Layer();
+    stage.add(layer1);
+    stage.add(layer2);
+
+    const group = new Konva.Group({
+      x: width / 2,
+      y: height / 2,
+      globalCompositeOperation: 'screen'
+    });
+
+    const text1 = new Konva.Text({
+      text: 'Animate me!',
+      fontSize: 60,
+      fontFamily: 'Arial',
+      fontStyle: 'bold',
+      fill: 'cyan',
+      align: 'center',
+      verticalAlign: 'middle'
+    });
+
+    const text2 = new Konva.Text({
+      text: 'Animate me!',
+      fontSize: 60,
+      fontFamily: 'Arial',
+      fontStyle: 'bold',
+      fill: 'red',
+      align: 'center',
+      verticalAlign: 'middle'
+    });
+
+    text1.offsetX(text1.width() / 2);
+    text1.offsetY(text1.height() / 2);
+
+    text2.offsetX(text2.width() / 2);
+    text2.offsetY(text2.height() / 2);
+
+    group.add(text1);
+    group.add(text2);
+    layer1.add(group);
+
+    const anim = new Konva.Animation((frame) => {
+      const offsetX = Math.random() * 6 - 3;
+      const offsetY = Math.random() * 6 - 3;
+      text1.x(offsetX);
+      text1.y(offsetY);
+
+      text2.x(-offsetX);
+      text2.y(-offsetY);
+    }, layer1);
+
+    anim.start();
+  </script>
+</body>
+</html>
