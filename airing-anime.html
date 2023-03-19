@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anime Season</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
+  <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+  <style>
+    body {
+      padding: 20px;
+    }
+
+    .card {
+      margin-bottom: 20px;
+    }
+
+    .title.is-4 {
+      height: 48px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .subtitle.is-6 {
+      font-size: 14px;
+      color: green;
+    }
+
+    .title.is-4 {
+      margin-bottom: 28px;
+    }
+  </style>
+</head>
+
+<body>
+  <section class="section">
+    <div class="container">
+      <h1 class="title">This Season's Anime</h1>
+      <div id="anime-list" class="columns is-multiline"></div>
+    </div>
+  </section>
+  <script>
+    async function fetchAnime() {
+      const query = `
+        query {
+          Page {
+            media(sort: POPULARITY_DESC, type: ANIME, 
+            season: ${getSeason()}, 
+            seasonYear: ${new Date().getFullYear()}, isAdult: false) {
+              id
+              title { userPreferred }
+              coverImage { large }
+              nextAiringEpisode { airingAt timeUntilAiring }
+            }
+          }
+        }
+      `;
+
+      const response = await fetch("https://graphql.anilist.co", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({query}),
+      });
+
+      const {data} = await response.json();
+      return data.Page.media;
+    }
+
+    function getSeason() {
+      const month = new Date().getMonth() + 1;
+      if (month >= 1 && month <= 3) return "WINTER";
+      if (month >= 4 && month <= 6) return "SPRING";
+      if (month >= 7 && month <= 9) return "SUMMER";
+      return "FALL";
+    }
+
+    function displayAnime(animeList) {
+      const container = document.getElementById("anime-list");
+      animeList.forEach(anime => {
+        const card = `
+      <div class="column is-one-quarter">
+        <div class="card">
+          <div class="card-image">
+            <figure class="image">
+              <img src="${anime.coverImage.large}" alt="${anime.title.userPreferred}">
+            </figure>
+          </div>
+          <div class="card-content">
+            <div class="media">
+              <div class="media-content">
+                <p class="title is-4">${anime.title.userPreferred}</p>
+                <p class="subtitle is-6">Next episode in ${anime.nextAiringEpisode ? formatTime(anime.nextAiringEpisode.timeUntilAiring) : 'N/A'}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+        container.innerHTML += card;
+      });
+    }
+
+    function sortAnime(animeList) {
+      return animeList.sort((a, b) => {
+        if (a.nextAiringEpisode && b.nextAiringEpisode) {
+          return a.nextAiringEpisode.timeUntilAiring - b.nextAiringEpisode.timeUntilAiring;
+        } else if (a.nextAiringEpisode) {
+          return -1;
+        } else {
+          return 1;
+        }
+      });
+    }
+
+    function formatTime(seconds) {
+      const units = [
+        {label: "year", seconds: 31536000},
+        {label: "month", seconds: 2592000},
+        {label: "week", seconds: 604800},
+        {label: "day", seconds: 86400},
+        {label: "hour", seconds: 3600},
+        {label: "minute", seconds: 60},
+      ];
+
+      const result = [];
+      for (const unit of units) {
+        const value = Math.floor(seconds / unit.seconds);
+        if (value > 0) {
+          result.push(`${value} ${unit.label}${value > 1 ? "s" : ""}`);
+          seconds -= value * unit.seconds;
+        }
+      }
+      return result.join(", ");
+    }
+
+    (async () => {
+      const animeList = await fetchAnime();
+      displayAnime(sortAnime(animeList));
+    })();
+  </script>
+</body>
+
+</html>
