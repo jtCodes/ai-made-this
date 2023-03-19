@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bitcoin Price Tracker</title>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <style>
+    body { text-align: center; font-family: Arial, sans-serif; }
+    #price { font-size: 2rem; transition: background-color 1s; }
+    .green { background-color: #00ff00; }
+    .red { background-color: #ff0000; }
+  </style>
+</head>
+<body>
+  <h1>Current Bitcoin Price</h1>
+  <div id="price"></div>
+  <p>Last fetched: <span id="lastFetched"></span></p>
+  <p>Next fetch in <span id="countdown">60</span> seconds</p>
+  <script>
+    let previousPrice = 0;
+    let countdownInterval;
+
+    async function fetchBitcoinPrice() {
+      try {
+        const response = await axios.get('https://api.coindesk.com/v1/bpi/currentprice/BTC.json');
+        const currentPrice = parseFloat(response.data.bpi.USD.rate.replace(/,/g, ''));
+        const priceElement = document.getElementById('price');
+        priceElement.innerText = currentPrice.toFixed(2) + ' USD';
+        
+        if (previousPrice > 0) {
+          priceElement.classList.toggle('green', currentPrice > previousPrice);
+          priceElement.classList.toggle('red', currentPrice < previousPrice);
+        }
+
+        previousPrice = currentPrice;
+        document.getElementById('lastFetched').innerText = new Date().toLocaleString();
+      } catch (error) {
+        document.getElementById('price').innerText = 'Error fetching price';
+      }
+    }
+
+    function startCountdown() {
+      clearInterval(countdownInterval);
+      let countdown = 60;
+      document.getElementById('countdown').innerText = countdown;
+      countdownInterval = setInterval(() => {
+        countdown--;
+        document.getElementById('countdown').innerText = countdown;
+        if (countdown === 0) {
+          clearInterval(countdownInterval);
+        }
+      }, 1000);
+    }
+
+    fetchBitcoinPrice();
+    startCountdown();
+    setInterval(() => {
+      fetchBitcoinPrice();
+      startCountdown();
+    }, 60000);
+  </script>
+</body>
+</html>
