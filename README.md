@@ -7,3 +7,6 @@
 
 - [bitcoin price text](https://replit.com/@jtCodes1/bitcoinprice#index.html)
 <img width="510" alt="Screenshot 2023-03-19 at 3 56 46 PM" src="https://user-images.githubusercontent.com/23707104/226205564-4a23084b-71d8-4d74-99f0-20838955d2cc.png">
+
+- [airing anime](https://replit.com/@jtCodes1/airing-anime#index.html)
+<img width="897" alt="Screenshot 2023-03-19 at 7 25 31 PM" src="https://user-images.githubusercontent.com/23707104/226216352-158aab25-f657-4afd-a59c-d194c26b17a7.png">
